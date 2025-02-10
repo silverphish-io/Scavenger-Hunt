@@ -1,2 +1,2 @@
 # Scavenger-Hunt
-A bot to aide my scavenger hunts
+A bot to help with running my scavenger hunt events.
