@@ -11,14 +11,14 @@ load_dotenv()
 CTFD_API_KEY = os.getenv('CTFD_API_KEY')
 
 # Define the lookup function
-async def lookup_function(ctx, member: discord.Member):
+async def lookup_function(interaction: discord.Interaction, member: discord.Member):
     discord_id = member.id
     response = requests.get(f'http://127.0.0.1/user/{discord_id}')
     
     try:
         data = response.json()
     except requests.exceptions.JSONDecodeError:
-        await ctx.send('Error: Received invalid JSON response from the server.')
+        await interaction.response.send_message('Error: Received invalid JSON response from the server.')
         return
     
     ctfd_id = data['data']['ctfd_id']
@@ -33,7 +33,7 @@ async def lookup_function(ctx, member: discord.Member):
     try:
         ctfd_data = ctfd_response.json()
     except requests.exceptions.JSONDecodeError:
-        await ctx.send('Error: Received invalid JSON response from the CTFd API.')
+        await interaction.response.send_message('Error: Received invalid JSON response from the CTFd API.')
         return
     
     # Print the contents of ctfd_data
@@ -58,7 +58,7 @@ async def lookup_function(ctx, member: discord.Member):
     
     user_details = f"CTFd User Details:\nID: {user_id}\nName: {user_name}\nEmail: {user_email}\nTeam Name: {team_name}"
     
-    await ctx.send(user_details)
+    await interaction.response.send_message(user_details)
 
 # Define the get_team_name function
 async def get_team_name(discord_id):
