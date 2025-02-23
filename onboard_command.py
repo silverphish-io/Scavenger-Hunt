@@ -11,16 +11,26 @@ async def onboard_function(interaction: discord.Interaction, member: discord.Mem
         guild = interaction.guild
         existing_role = discord.utils.get(guild.roles, name=team_name)
         
+        print(f'Checking if {team_name} role already exists and if {member.display_name} is a member.')
         if existing_role:
             role = existing_role
-            await interaction.response.send_message(f'Role "{team_name}" already exists.')
+            print(f'{team_name} role already exists.')
+            # Check if the member already has the role
+            if role in member.roles:
+                print(f'{member.display_name} already has the role {team_name}.')
+                await interaction.response.send_message(f'{team_name} role already exists and {member.display_name} is a member.')
+            else:
+                # Role exists but member does not have the role
+                print(f'Adding {member.display_name} to {team_name}.')
+                await interaction.response.send_message(f'Adding {member.display_name} to {team_name}.')
+                await member.add_roles(role)
         else:
             # Create a new role with the team name and no permissions
             role = await guild.create_role(name=team_name, permissions=discord.Permissions.none())
-            await interaction.response.send_message(f'Role "{team_name}" created.')
-        
-        # Assign the role to the mentioned user
-        await member.add_roles(role)
-        await interaction.followup.send(f'Role "{team_name}" assigned to {member.display_name}.')
+            print(f'Role "{team_name}" created.')
+
+            await member.add_roles(role)
+            print(f'{member.display_name} added to "{team_name}".')
+            await interaction.response.send_message(f'{team_name} role created and {member.display_name} is now a member.')
     else:
         await interaction.response.send_message('Error: Could not retrieve team name.')
