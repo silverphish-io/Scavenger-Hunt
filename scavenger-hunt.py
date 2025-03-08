@@ -2,9 +2,10 @@ import discord
 from discord.ext import commands
 import os
 from dotenv import load_dotenv
-from whois_command import whois_function  # Import the whois function
-from lookup_command import lookup_function  # Import the lookup function
-from onboard_command import onboard_function  # Import the onboard function
+from whois_command import whois_function # Import the whois function
+from lookup_command import lookup_function # Import the lookup function
+from onboard_command import onboard_function # Import the onboard function
+from submit_command import submit, get_challenge_names, mark_submission  # Import the on_raw_reaction_add function
 
 # Load the .env file
 load_dotenv()
@@ -14,11 +15,13 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 
 # Define the intents
 intents = discord.Intents.default()
-intents.message_content = True  # Enable the message content intent
-intents.guilds = True  # Enable guilds intent
-intents.members = True  # Enable members intent
+intents.message_content = True # Enable the message content intent
+intents.guilds = True # Enable guilds intent
+intents.members = True # Enable members intent
+intents.reactions = True
 
 # Create a bot instance with the specified intents
+# TODO: Pretty sure this isnt needed anymore now that we're using slash commands?
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 # Define an event for when the bot is ready
@@ -47,6 +50,33 @@ async def lookup(interaction: discord.Interaction, member: discord.Member):
 @bot.tree.command(name="onboard", description="Onboards a user to a team")
 async def onboard(interaction: discord.Interaction, member: discord.Member):
     await onboard_function(interaction, member)
+
+# Define the submit command using slash commands with autocomplete for challenge names
+@bot.tree.command(name="submit", description="Queries CTFd API for a challenge ID")
+async def submit_command(interaction: discord.Interaction, challenge_name: str):
+    await submit(interaction, challenge_name)
+
+# Query CTF challenges and autocomplete as the user types
+@submit_command.autocomplete("challenge_name")
+async def autocomplete_challenge_name(interaction: discord.Interaction, current: str):
+    challenge_names = get_challenge_names()
+    return [discord.app_commands.Choice(name=challenge, value=challenge) for challenge in challenge_names if current.lower() in challenge.lower()]
+
+'''
+# Event listener for reactions
+@bot.event
+async def on_raw_reaction_add(payload):
+    channel = bot.get_channel(payload.channel_id)
+    message = await channel.fetch_message(payload.message_id)
+    if discord.utils.get(message.reactions,emoji='\u2705'):
+        print(str(payload.member) + " pressed the check mark")
+'''
+
+# Event listener for reactions
+@bot.event
+async def on_raw_reaction_add(payload):
+    # Need to rename this as it's causing a clash with the native function
+    await mark_submission(bot, payload)
 
 # Run the bot with the token
 bot.run(TOKEN)
