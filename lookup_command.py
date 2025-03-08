@@ -9,12 +9,13 @@ load_dotenv()
 
 # Get the CTFd API key from the .env file
 CTFD_API_KEY = os.getenv('CTFD_API_KEY')
+DOMAIN = os.getenv('DOMAIN')
 
 # Define the lookup function
 # TODO fix this to use f'{DOMAIN}
 async def lookup_function(interaction: discord.Interaction, member: discord.Member):
     discord_id = member.id
-    response = requests.get(f'http://127.0.0.1/user/{discord_id}')
+    response = requests.get(f'{DOMAIN}/user/{discord_id}')
     
     try:
         data = response.json()
@@ -29,7 +30,7 @@ async def lookup_function(interaction: discord.Interaction, member: discord.Memb
         'Authorization': f'Token {CTFD_API_KEY}',
         'Content-Type': 'application/json'
     }
-    ctfd_response = requests.get(f'http://127.0.0.1/api/v1/users/{ctfd_id}', headers=headers)
+    ctfd_response = requests.get(f'{DOMAIN}/api/v1/users/{ctfd_id}', headers=headers)
     
     try:
         ctfd_data = ctfd_response.json()
@@ -48,7 +49,7 @@ async def lookup_function(interaction: discord.Interaction, member: discord.Memb
     
     # If team_id is present, query the CTFd API to get the team name
     if team_id:
-        team_response = requests.get(f'http://127.0.0.1/api/v1/teams/{team_id}', headers=headers)
+        team_response = requests.get(f'{DOMAIN}/api/v1/teams/{team_id}', headers=headers)
         try:
             team_data = team_response.json()
             team_name = team_data['data'].get('name', 'N/A')
@@ -63,7 +64,7 @@ async def lookup_function(interaction: discord.Interaction, member: discord.Memb
 
 # Define the get_team_name function
 async def get_team_name(discord_id):
-    response = requests.get(f'http://127.0.0.1/user/{discord_id}')
+    response = requests.get(f'{DOMAIN}/user/{discord_id}')
     
     try:
         data = response.json()
@@ -77,7 +78,7 @@ async def get_team_name(discord_id):
         'Authorization': f'Token {CTFD_API_KEY}',
         'Content-Type': 'application/json'
     }
-    ctfd_response = requests.get(f'http://127.0.0.1/api/v1/users/{ctfd_id}', headers=headers)
+    ctfd_response = requests.get(f'{DOMAIN}/api/v1/users/{ctfd_id}', headers=headers)
     
     try:
         ctfd_data = ctfd_response.json()
@@ -87,7 +88,7 @@ async def get_team_name(discord_id):
     team_id = ctfd_data['data'].get('team_id', None)
     
     if team_id:
-        team_response = requests.get(f'http://127.0.0.1/api/v1/teams/{team_id}', headers=headers)
+        team_response = requests.get(f'{DOMAIN}/api/v1/teams/{team_id}', headers=headers)
         try:
             team_data = team_response.json()
             team_name = team_data['data'].get('name', None)
