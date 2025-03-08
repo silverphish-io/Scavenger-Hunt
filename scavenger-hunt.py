@@ -62,20 +62,9 @@ async def autocomplete_challenge_name(interaction: discord.Interaction, current:
     challenge_names = get_challenge_names()
     return [discord.app_commands.Choice(name=challenge, value=challenge) for challenge in challenge_names if current.lower() in challenge.lower()]
 
-'''
 # Event listener for reactions
 @bot.event
 async def on_raw_reaction_add(payload):
-    channel = bot.get_channel(payload.channel_id)
-    message = await channel.fetch_message(payload.message_id)
-    if discord.utils.get(message.reactions,emoji='\u2705'):
-        print(str(payload.member) + " pressed the check mark")
-'''
-
-# Event listener for reactions
-@bot.event
-async def on_raw_reaction_add(payload):
-    # Need to rename this as it's causing a clash with the native function
     await mark_submission(bot, payload)
 
 # Run the bot with the token
