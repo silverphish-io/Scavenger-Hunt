@@ -12,7 +12,6 @@ CTFD_API_KEY = os.getenv('CTFD_API_KEY')
 DOMAIN = os.getenv('DOMAIN')
 
 # Define the lookup function
-# TODO fix this to use f'{DOMAIN}
 async def lookup_function(interaction: discord.Interaction, member: discord.Member):
     discord_id = member.id
     response = requests.get(f'{DOMAIN}/user/{discord_id}')
