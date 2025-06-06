@@ -94,9 +94,15 @@ async def mark_submission(bot, payload):
             json = {
                 "challenge_id": int(get_challenge_id(message.content)),
                 "user_id": int(get_ctfd_user_id(interaction_metadata.user.id)),
+                "team_id": int(get_ctfd_team_id(interaction_metadata.user.id)),
                 "provided": "MARKED AS SOLVED BY BOT",
                 "type": "correct"
             }
+
+            # print the domain, headers, and json for debugging
+            print("Domain:", DOMAIN + "/api/v1/submissions")
+            print("Headers:", headers)
+            print("JSON:", json)
 
             response = requests.post(f'{DOMAIN}/api/v1/submissions', headers=headers, json=json)
 
@@ -137,5 +143,30 @@ def get_ctfd_user_id(discord_id):
         data = response.json()
         ctfd_id = data['data']['ctfd_id']
         return ctfd_id
+    else:
+        return f'Error: {response.status_code}'
+    
+def get_ctfd_team_id(discord_id):
+    
+    # Janky way to get the team ID from the CTFd API using the user's discord ID
+    # I need to update my oauth plugin to return the team ID as well
+    headers = {
+        'Authorization': f'Token {CTFD_API_KEY}',
+        'Content-Type': 'application/json'
+    }
+
+    ctfd_user_id = get_ctfd_user_id(discord_id)
+    if isinstance(ctfd_user_id, str) and ctfd_user_id.startswith('Error'):
+        return ctfd_user_id  # Return the error message if user ID retrieval failed
+
+    response = requests.get(f'{DOMAIN}/api/v1/users/{ctfd_user_id}', headers=headers)
+
+    if response.status_code == 200:
+        user_data = response.json().get('data', {})
+        team_id = user_data.get('team_id')
+        if team_id:
+            return team_id  # Return the team ID
+        else:
+            return 'Team not found'
     else:
         return f'Error: {response.status_code}'
