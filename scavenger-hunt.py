@@ -38,6 +38,7 @@ async def ping(interaction: discord.Interaction):
 
 # Define the whois command using slash commands
 @bot.tree.command(name="whois", description="Displays user information")
+@discord.app_commands.checks.has_role("Judge")  # Only allow users with the Judge role
 async def whois(interaction: discord.Interaction, member: discord.Member):
     await whois_function(interaction, member)
 
@@ -59,8 +60,39 @@ async def submit_command(interaction: discord.Interaction, challenge_name: str):
 # Query CTF challenges and autocomplete as the user types
 @submit_command.autocomplete("challenge_name")
 async def autocomplete_challenge_name(interaction: discord.Interaction, current: str):
+    # Get all challenge names
     challenge_names = get_challenge_names()
-    return [discord.app_commands.Choice(name=challenge, value=challenge) for challenge in challenge_names if current.lower() in challenge.lower()]
+
+    # Get the CTFd user ID for the Discord user
+    from submit_command import get_ctfd_user_id
+    ctfd_user_id = get_ctfd_user_id(interaction.user.id)
+    if isinstance(ctfd_user_id, str) and ctfd_user_id.startswith('Error'):
+        return []  # Can't get user ID, so return nothing
+
+    # Fetch correct submissions for this user
+    import requests, os
+    CTFD_API_KEY = os.getenv('CTFD_API_KEY')
+    DOMAIN = os.getenv('DOMAIN')
+    headers = {
+        'Authorization': f'Token {CTFD_API_KEY}',
+        'Content-Type': 'application/json'
+    }
+    submissions_resp = requests.get(
+        f"{DOMAIN}/api/v1/users/{ctfd_user_id}/solves", headers=headers
+    )
+    solved_challenges = set()
+    if submissions_resp.status_code == 200:
+        solves = submissions_resp.json().get('data', [])
+        for solve in solves:
+            solved_challenges.add(solve['challenge']['name'])
+
+    # Only show challenges not already solved
+    filtered = [
+        discord.app_commands.Choice(name=challenge, value=challenge)
+        for challenge in challenge_names
+        if current.lower() in challenge.lower() and challenge not in solved_challenges
+    ]
+    return filtered
 
 # Event listener for reactions
 @bot.event
