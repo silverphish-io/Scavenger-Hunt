@@ -44,11 +44,13 @@ async def whois(interaction: discord.Interaction, member: discord.Member):
 
 # Define the lookup command using slash commands
 @bot.tree.command(name="lookup", description="Looks up CTFd user details")
+@discord.app_commands.checks.has_role("Judge")  # Only allow users with the Judge role
 async def lookup(interaction: discord.Interaction, member: discord.Member):
     await lookup_function(interaction, member)
 
 # Define the onboard command using slash commands
 @bot.tree.command(name="onboard", description="Onboards a user to a team")
+@discord.app_commands.checks.has_role("Judge")  # Only allow users with the Judge role
 async def onboard(interaction: discord.Interaction, member: discord.Member):
     await onboard_function(interaction, member)
 
