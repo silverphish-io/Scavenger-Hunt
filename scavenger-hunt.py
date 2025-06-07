@@ -65,7 +65,6 @@ async def autocomplete_challenge_name(interaction: discord.Interaction, current:
 # Event listener for reactions
 @bot.event
 async def on_raw_reaction_add(payload):
-    print(payload.emoji.name)  # Debugging statement
     # Start onboarding if a discord user reacts with the clipboard emoji
     if payload.emoji.name == "📋":
         guild = bot.get_guild(payload.guild_id)
