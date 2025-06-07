@@ -48,3 +48,26 @@ async def onboard_function(interaction: discord.Interaction, member: discord.Mem
             await interaction.followup.send('Category "TEAMS" does not exist.')
     else:
         await interaction.response.send_message('Error: Could not retrieve team name.')
+
+async def onboard_member_by_reaction(guild, member):
+    team_name = await get_team_name(member.id)
+
+    if team_name:
+        # Check if the role already exists
+        existing_role = discord.utils.get(guild.roles, name=team_name)
+        print(f'Checking if {team_name} role already exists and if {member.display_name} is a member.')
+
+        if existing_role:
+            role = existing_role
+            if role not in member.roles:
+                await member.add_roles(role)
+        else:
+            role = await guild.create_role(name=team_name, permissions=discord.Permissions.none())
+            await member.add_roles(role)
+        category = discord.utils.find(lambda c: c.name.lower() == "teams", guild.categories)
+        if category:
+            overwrites = {
+                guild.default_role: discord.PermissionOverwrite(read_messages=False),
+                role: discord.PermissionOverwrite(read_messages=True)
+            }
+            await guild.create_text_channel(name=team_name, category=category, overwrites=overwrites)
