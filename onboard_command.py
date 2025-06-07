@@ -11,6 +11,11 @@ async def onboard_function(interaction: discord.Interaction, member: discord.Mem
         guild = interaction.guild
         existing_role = discord.utils.get(guild.roles, name=team_name)
         
+        scav_role = discord.utils.get(guild.roles, name="Scav Hunt '25")
+        if scav_role and scav_role not in member.roles:
+            await member.add_roles(scav_role)
+            print(f"{member.display_name} added to Scav Hunt '25' role.")
+
         print(f'Checking if {team_name} role already exists and if {member.display_name} is a member.')
         if existing_role:
             role = existing_role
@@ -52,9 +57,16 @@ async def onboard_function(interaction: discord.Interaction, member: discord.Mem
 async def onboard_member_by_reaction(guild, member):
     team_name = await get_team_name(member.id)
 
+
+    scav_role = discord.utils.get(guild.roles, name="Scav Hunt '25")
+    if scav_role and scav_role not in member.roles:
+        await member.add_roles(scav_role)
+        print(f"{member.display_name} added to Scav Hunt '25' role.")
+
     if team_name:
         # Check if the role already exists
         existing_role = discord.utils.get(guild.roles, name=team_name)
+
         print(f'Checking if {team_name} role already exists and if {member.display_name} is a member.')
 
         if existing_role:
