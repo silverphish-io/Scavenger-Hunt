@@ -109,5 +109,12 @@ async def on_raw_reaction_add(payload):
             await onboard_member_by_reaction(guild, member)
     await mark_submission(bot, payload)
 
+# Event listener for when a member joins
+@bot.event
+async def on_member_join(member):
+    guild = member.guild
+    from onboard_command import onboard_member_by_reaction
+    await onboard_member_by_reaction(guild, member)
+
 # Run the bot with the token
 bot.run(TOKEN)
