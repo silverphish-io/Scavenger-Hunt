@@ -18,11 +18,15 @@ def get_challenge_names():
         'Authorization': f'Token {CTFD_API_KEY}',
         'Content-Type': 'application/json'
     }
-    # TODO update this to pull the domain from the env file instead
     response = requests.get(f'{DOMAIN}/api/v1/challenges', headers=headers)
     if response.status_code == 200:
         challenges_data = response.json()
-        challenge_names = [challenge['name'] for challenge in challenges_data.get('data', [])]
+        # Only include challenges in the "Scavenger Hunt" category
+        challenge_names = [
+            challenge['name']
+            for challenge in challenges_data.get('data', [])
+            if challenge.get('category') == "Scavenger Hunt"
+        ]
         return challenge_names
     else:
         return []
