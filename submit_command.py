@@ -21,6 +21,8 @@ def get_challenge_names():
     response = requests.get(f'{DOMAIN}/api/v1/challenges', headers=headers)
     if response.status_code == 200:
         challenges_data = response.json()
+        # Print the challenges data for debugging
+        print("Challenges data:", challenges_data)  # Debugging statement
         # Only include challenges in the "Scavenger Hunt" category
         challenge_names = [
             challenge['name']
