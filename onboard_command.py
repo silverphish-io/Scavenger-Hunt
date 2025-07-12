@@ -35,16 +35,22 @@ async def _onboard_core(guild, member, interaction=None):
     # Channel logic
     category = discord.utils.find(lambda c: c.name.lower() == "teams", guild.categories)
     if category:
-        judge_role = discord.utils.get(guild.roles, name="Judge")
-        overwrites = {
-            guild.default_role: discord.PermissionOverwrite(read_messages=False),
-            role: discord.PermissionOverwrite(read_messages=True)
-        }
-        if judge_role:
-            overwrites[judge_role] = discord.PermissionOverwrite(read_messages=True)
-        await guild.create_text_channel(name=team_name, category=category, overwrites=overwrites)
-        if interaction:
-            await interaction.followup.send(f'Text channel "{team_name}" created in "TEAMS" category with access for the role and Judge role.')
+        # Check if a channel with the team name already exists
+        existing_channel = discord.utils.get(category.channels, name=team_name)
+        if existing_channel:
+            if interaction:
+                await interaction.followup.send(f'Text channel "{team_name}" already exists in "TEAMS" category.')
+        else:
+            judge_role = discord.utils.get(guild.roles, name="Judge")
+            overwrites = {
+                guild.default_role: discord.PermissionOverwrite(read_messages=False),
+                role: discord.PermissionOverwrite(read_messages=True)
+            }
+            if judge_role:
+                overwrites[judge_role] = discord.PermissionOverwrite(read_messages=True)
+            await guild.create_text_channel(name=team_name, category=category, overwrites=overwrites)
+            if interaction:
+                await interaction.followup.send(f'Text channel "{team_name}" created in "TEAMS" category with access for the role and Judge role.')
     else:
         if interaction:
             await interaction.followup.send('Category "TEAMS" does not exist.')
