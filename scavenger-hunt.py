@@ -94,7 +94,7 @@ async def autocomplete_challenge_name(interaction: discord.Interaction, current:
         for challenge in challenge_names
         if current.lower() in challenge.lower() and challenge not in solved_challenges
     ]
-    return filtered
+    return filtered[:25]  # Limit to 25 results
 
 # Event listener for reactions
 @bot.event
